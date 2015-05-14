@@ -61,7 +61,7 @@ int main(void)
 
 	yyin = stdin;
 	if (yyparse()) {
-		fprinf(stderr, "Error! Error! Error!\n");
+		fprintf(stderr, "Error! Error! Error!\n");
 		exit(1);
 	}
 }
