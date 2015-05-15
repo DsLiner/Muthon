@@ -5,11 +5,7 @@
 	#include <math.h>
 	#define YYDEBUG 1
 %}
-%union {
-	int		int_value;
-	double		double_value;
-}
-%token ArrayLeft RightBracket LeftParen RightParen
+%token LeftBracket RightBracket LeftParen RightParen
 %token Comma Assign Equal Less LessEqual Greater
 %token GreaterEqual Not NotEqual Plus Minus Multiply
 %token Exponent Divide Modulus And Or If Elif Else
@@ -185,6 +181,12 @@ Primary
 	| Literal
 	| LeftParen Expression RightParen
 	| Type LeftParen Expression RightParen
+	;
+Literal
+	: Integer
+	| Boolean
+	| Float
+	| String
 	;
 %%
 int
