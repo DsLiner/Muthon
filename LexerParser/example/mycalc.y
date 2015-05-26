@@ -18,16 +18,19 @@ line_list
 line
 	: expression CR
 	{
+		printf("1\n");
 		printf(">>%lf\n", $1);
 	}
 expression
 	: term
 	| expression ADD term
 	{
+		printf("2\n");
 		$$ = $1 + $3;
 	}
 	| expression SUB term
 	{
+		printf("2\n");
 		$$ = $1 - $3;
 	}
 	;
@@ -35,10 +38,12 @@ term
 	: primary_expression
 	| term MUL primary_expression
 	{
+		printf("3\n");
 		$$ = $1 * $3;
 	}
 	| term DIV primary_expression
 	{
+		printf("3\n");
 		$$ = $1 / $3;
 	}
 	;
