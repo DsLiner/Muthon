@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LexerParser
 {
-    class Token
+    public class Token
     {
         private static int KEYWORDS = (int)TokenType.Eof;
 
@@ -92,7 +92,7 @@ namespace LexerParser
         public override String ToString() {
             if ((int)type < (int)TokenType.Identifier) return value;
             return type + "\t" + value;
-        } // toString
+        } // ToString
         /*
         static void Main (String[] args) {
             Console.WriteLine(eofTok);

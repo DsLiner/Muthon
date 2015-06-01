@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.ArrayList;
 using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,13 +24,13 @@ namespace LexerParser
 	    }
 	} // Indenter
 
-    class Program
+    public class Program
     {
         // Program = Declarations decpart ; Block body
         Declarations decpart;
         Block body;
 
-        Program (Declarations d, Block b)
+        public Program (Declarations d, Block b)
         {
             decpart = d;
             body = b;
@@ -49,17 +49,17 @@ namespace LexerParser
 
     }
 
-    class Declarations : ArrayList<Declaration> {
+    public class Declarations : ArrayList {
         // Declarations = Declaration*
         // (a list of declarations d1, d2, ..., dn)
 	
 	    public void display (int level) {
             Indenter indent = new Indenter(level);
-            indent.display(getClass().toString().substring(6) + ": ");
+            indent.display(GetType().ToString().Substring(12) + ": ");
             indent.display("  Declarations = {");
             String sep = "";
-            foreach (Declaration dcl in this) {
-                Console.WriteLine(sep);
+            foreach (dynamic dcl in this) {
+                Console.Write(sep);
                 dcl.display();
                 sep = ", ";
             }
@@ -72,12 +72,12 @@ namespace LexerParser
         Variable v;
         Type t;
 
-        Declaration (Variable var, Type type) {
+        public Declaration (Variable var, Type type) {
             v = var; t = type;
         } // declaration */
 
         public void display () {
-            Console.Write("<" + v + ", " + t.toString() + ">");
+            Console.Write("<" + v.ToString() + ", " + t.ToString() + ">");
         }
     }
 
@@ -93,43 +93,43 @@ namespace LexerParser
 
         private Type (String t) { id = t; }
 
-        public String toString ( ) { return id; }
+        new public String ToString ( ) { return id; }
     }
 
-    abstract class Statement {
+   public abstract class Statement {
         // Statement = Skip | Block | Assignment | Conditional | Loop
 	    public void display (int level) {
             Indenter indent = new Indenter(level);
-            indent.display(getClass().toString().substring(6) + ": ");
+            indent.display(GetType().ToString().Substring(12) + ": ");
        }
     }
 
     class Skip : Statement {
     }
 
-    class Block : Statement {
+    public class Block : Statement {
         // Block = Statement*
         //         (a Vector of members)
-        public ArrayList<Statement> members = new ArrayList<Statement>();
+        public ArrayList members = new ArrayList();
 
-        public void display(int level) {
+        new public void display(int level) {
             base.display(level);
-            foreach (Statement s in members) 
+            foreach (dynamic s in members) 
                 s.display(level+1);
         }
     }
 
     class Assignment : Statement {
         // Assignment = Variable target; Expression source
-        Variable target;
-        Expression source;
+        dynamic target;
+        dynamic source;
 
-        Assignment (Variable t, Expression e) {
+        public Assignment (Variable t, dynamic e) {
             target = t;
             source = e;
         }
 
-        public void display (int level) {
+        new public void display (int level) {
             base.display(level);
             target.display(level+1);
             source.display(level+1);
@@ -138,48 +138,48 @@ namespace LexerParser
 
     class Conditional : Statement {
     // Conditional = Expression test; Statement thenbranch, elsebranch
-        Expression test;
-        Statement thenbranch, elsebranch;
+        dynamic test;
+        dynamic thenbranch, elsebranch;
         // elsebranch == null means "if... then"
     
-        Conditional (Expression t, Statement tp) {
+        public Conditional (Expression t, Statement tp) {
             test = t; thenbranch = tp; elsebranch = new Skip( );
         }
     
-        Conditional (Expression t, Statement tp, Statement ep) {
+        public Conditional (Expression t, Statement tp, Statement ep) {
             test = t; thenbranch = tp; elsebranch = ep;
         }
     
-        public void display (int level) {
+        new public void display (int level) {
             base.display(level);
             test.display(level+1);
             thenbranch.display(level+1);
-            Debug.Assert(elsebranch != null, "else branch cannot be null");
+            // Debug.Assert(elsebranch != null, "else branch cannot be null");
             elsebranch.display(level+1);
          }
     }
 
     class Loop : Statement {
     // Loop = Expression test; Statement body
-        Expression test;
-        Statement body;
+        dynamic test;
+        dynamic body;
 
-        Loop (Expression t, Statement b) {
+        public Loop (Expression t, Statement b) {
             test = t; body = b;
         }
     
-        public void display (int level) {
+        new public void display (int level) {
             base.display(level);
             test.display(level+1);
             body.display(level+1);
-         }
+        }
     }
 
     abstract class Expression {
         // Expression = Variable | Value | Binary | Unary
 	    public void display (int level) {
             Indenter indent = new Indenter(level);
-            indent.display(getClass().toString().substring(6) + ": ");
+            indent.display(GetType().ToString().Substring(12) + ": ");
        }
     }
 
@@ -187,18 +187,18 @@ namespace LexerParser
         // Variable = String id
         private String id;
 
-        Variable (String s) { id = s; }
+        public Variable (String s) { id = s; }
 
-        public String toString( ) { return id; }
+        new public String ToString( ) { return id; }
     
         public bool equals (Object obj) {
             String s = ((Variable) obj).id;
-            return id.equals(s); // case-sensitive identifiers
+            return id == s; // case-sensitive identifiers
         }
     
         public int hashCode ( ) { return id.GetHashCode(); }
 
-        public void display (int level) {
+        new public void display (int level) {
             base.display(level);
             Console.Write(id);
        }
@@ -206,7 +206,7 @@ namespace LexerParser
 
     abstract class Value : Expression {
         // Value = IntValue | BoolValue |
-        //         CharValue | FloatValue
+        //        CharValue | FloatValue
         protected Type type;
         protected bool undef = true;
 
@@ -239,28 +239,28 @@ namespace LexerParser
             if (type == Type.BOOL) return new BoolValue( );
             if (type == Type.CHAR) return new CharValue( );
             if (type == Type.FLOAT) return new FloatValue( );
-            throw new IllegalArgumentException("Illegal type in mkValue");
+            throw new ArgumentException("Illegal type in mkValue");
         }
     }
 
     class IntValue : Value {
         private int value = 0;
 
-        IntValue ( ) { type = Type.INT; }
+        public IntValue ( ) { type = Type.INT; }
 
-        IntValue (int v) { this( ); value = v; undef = false; }
+        public IntValue (int v) { type = Type.INT; value = v; undef = false; }
 
         int intValue ( ) {
             Debug.Assert(!undef, "reference to undefined int value");
             return value;
         }
 
-        public String toString( ) {
+        new public String ToString( ) {
             if (undef)  return "undef";
             return "" + value;
         }
 
-        public void display (int level) {
+        new public void display (int level) {
             base.display(level);
             Console.Write(value);
         }
@@ -269,9 +269,9 @@ namespace LexerParser
     class BoolValue : Value {
         private bool value = false;
 
-        BoolValue ( ) { type = Type.BOOL; }
+        public BoolValue ( ) { type = Type.BOOL; }
 
-        BoolValue (bool v) { this( ); value = v; undef = false; }
+        public BoolValue (bool v) { type = Type.BOOL; value = v; undef = false; }
 
         bool boolValue ( ) {
             Debug.Assert(!undef, "reference to undefined bool value");
@@ -283,12 +283,12 @@ namespace LexerParser
             return value ? 1 : 0;
         }
 
-        public String toString( ) {
+        new public String ToString( ) {
             if (undef)  return "undef";
             return "" + value;
         }
 
-        public void display (int level) {
+        new public void display (int level) {
             base.display(level);
             Console.Write(value);
         }
@@ -297,21 +297,21 @@ namespace LexerParser
     class CharValue : Value {
         private char value = ' ';
 
-        CharValue ( ) { type = Type.CHAR; }
+        public CharValue ( ) { type = Type.CHAR; }
 
-        CharValue (char v) { this( ); value = v; undef = false; }
+        public CharValue (char v) { type = Type.CHAR; value = v; undef = false; }
 
         char charValue ( ) {
             Debug.Assert(!undef, "reference to undefined char value");
             return value;
         }
 
-        public String toString( ) {
+        new public String ToString( ) {
             if (undef)  return "undef";
             return "" + value;
         }
 
-        public void display (int level) {
+        new public void display (int level) {
             base.display(level);
             Console.Write(value);
         }
@@ -320,21 +320,21 @@ namespace LexerParser
     class FloatValue : Value {
         private float value = 0;
 
-        FloatValue ( ) { type = Type.FLOAT; }
+        public FloatValue ( ) { type = Type.FLOAT; }
 
-        FloatValue (float v) { this( ); value = v; undef = false; }
+        public FloatValue (float v) { type = Type.FLOAT; value = v; undef = false; }
 
         float floatValue ( ) {
             Debug.Assert(!undef, "reference to undefined float value");
             return value;
         }
 
-        public String toString( ) {
+        new public String ToString( ) {
             if (undef)  return "undef";
             return "" + value;
         }
 
-        public void display (int level) {
+        new public void display (int level) {
             base.display(level);
             Console.Write(value);
         }
@@ -343,13 +343,13 @@ namespace LexerParser
     class Binary : Expression {
     // Binary = Operator op; Expression term1, term2
         Operator op;
-        Expression term1, term2;
+        dynamic term1, term2;
 
-        Binary (Operator o, Expression l, Expression r) {
+        public Binary (Operator o, Expression l, Expression r) {
             op = o; term1 = l; term2 = r;
         } // binary
 
-        public void display (int level) {
+        new public void display (int level) {
             base.display(level);
             op.display(level+1);
             term1.display(level+1);
@@ -362,11 +362,11 @@ namespace LexerParser
         Operator op;
         Expression term;
 
-        Unary (Operator o, Expression e) {
+        public Unary (Operator o, Expression e) {
             op = o; term = e;
         } // unary
 
-        public void display (int level) {
+        new public void display (int level) {
             base.display(level);
             op.display(level+1);
             term.display(level+1);
@@ -450,10 +450,10 @@ namespace LexerParser
     
         String val;
     
-        Operator (String s) { val = s; }
+        public Operator (String s) { val = s; }
 
-        public String toString( ) { return val; }
-        public bool equals(Object obj) { return val == obj; }
+        new public String ToString( ) { return val; }
+        public bool equals(Object obj) { return val == (String)obj; }
     
         bool boolOp ( ) { return val == AND || val == OR; }
         bool RelationalOp ( ) {
@@ -497,33 +497,33 @@ namespace LexerParser
             {LE, BOOL_LE}, {GT, BOOL_GT}, {GE, BOOL_GE},
         };
 
-        static private Operator map (String[][] tmap, String op) {
-            for (int i = 0; i < tmap.length; i++)
-                if (tmap[i][0] == op)
-                    return new Operator(tmap[i][1]);
+        static private Operator MapOp (String[ , ] tmap, String op) {
+            for (int i = 0; i < tmap.Length; i++)
+                if (tmap[i, 0] == op)
+                    return new Operator(tmap[i, 1]);
             Debug.Assert(false, "should never reach here");
             return null;
         }
 
-        static public Operator intMap (String op) {
-            return map (intMap, op);
+        static public Operator intMapOp (String op) {
+            return MapOp(intMap, op);
         }
 
-        static public Operator floatMap (String op) {
-            return map (floatMap, op);
+        static public Operator floatMapOp (String op) {
+            return MapOp(floatMap, op);
         }
 
-        static public Operator charMap (String op) {
-            return map (charMap, op);
+        static public Operator charMapOp (String op) {
+            return MapOp(charMap, op);
         }
 
-        static public Operator boolMap (String op) {
-            return map (boolMap, op);
+        static public Operator boolMapOp (String op) {
+            return MapOp(boolMap, op);
         }
 
         public void display (int level) {
             Indenter indent = new Indenter(level);
-            indent.display(getClass().toString().substring(6) + ": " + val);
+            indent.display(GetType().ToString().Substring(12) + ": " + val);
        }
     }
 

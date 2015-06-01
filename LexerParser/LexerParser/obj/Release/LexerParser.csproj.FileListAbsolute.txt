@@ -1,0 +1,6 @@
+C:\Users\현근\documents\visual studio 2013\Projects\LexerParser\LexerParser\bin\Release\LexerParser.exe.config
+C:\Users\현근\documents\visual studio 2013\Projects\LexerParser\LexerParser\bin\Release\LexerParser.exe
+C:\Users\현근\documents\visual studio 2013\Projects\LexerParser\LexerParser\bin\Release\LexerParser.pdb
+C:\Users\현근\documents\visual studio 2013\Projects\LexerParser\LexerParser\obj\Release\LexerParser.exe
+C:\Users\현근\documents\visual studio 2013\Projects\LexerParser\LexerParser\obj\Release\LexerParser.pdb
+C:\Users\현근\documents\visual studio 2013\Projects\LexerParser\LexerParser\obj\Release\LexerParser.csprojResolveAssemblyReference.cache

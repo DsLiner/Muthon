@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 
 namespace LexerParser
 {
-    class Program
+    class Dummy
     {
         static void Main(String[] args)
         {
-
+            Parser parser = new Parser(new Lexer("example.txt"));
+            Program prog = parser.program_start();
+            prog.display();
         }
     }
 }

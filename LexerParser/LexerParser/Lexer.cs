@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace LexerParser
 {
@@ -10,24 +11,23 @@ namespace LexerParser
 
         private bool isEof = false;
         private char ch = ' '; 
-        private BufferedReader input;
+        private StreamReader input;
         private String line = "";
         private int lineno = 0;
         private int col = 1;
         private String letters = "abcdefghijklmnopqrstuvwxyz"
             + "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         private String digits = "0123456789";
-        private char eolnCh = '\n';
-        private char eofCh = null;
+        private char eofCh = '\0';
     
 
         public Lexer (String fileName) { // source filename
             try {
-                input = new BufferedReader (new FileReader(fileName));
+                input = new StreamReader(fileName);
             }
             catch (FileNotFoundException e) {
                 Console.WriteLine("File not found: " + fileName);
-                System.exit(1);
+                Environment.Exit(1);
             }
         }
 
@@ -35,27 +35,27 @@ namespace LexerParser
             if (ch == eofCh)
                 error("Attempt to read past end of file");
             col++;
-            if (col >= line.length()) {
+            if (col >= line.Length) {
                 try {
-                    line = input.readLine( );
+                    line = input.ReadLine();
                 } catch (IOException e) {
-                    System.err.println(e);
-                    System.exit(1);
+                    Console.Error.WriteLine(e);
+                    Environment.Exit(1);
                 } // try
                 if (line == null) // at end of file
                     line = "" + eofCh;
                 else {
                     // Console.WriteLine(lineno + ":\t" + line);
                     lineno++;
-                    line += eolnCh;
+                    line += "\n";
                 } // if line
                 col = 0;
             } // if col
-            return line.charAt(col);
+            return line[col];
         }
             
 
-        public Token next( ) { // Return next token
+        public Token next() { // Return next token
             do {
                 if (isLetter(ch)) { // ident or keyword
                     String spelling = concat(letters + digits);
@@ -67,7 +67,7 @@ namespace LexerParser
                     number += concat(digits);
                     return Token.mkFloatLiteral(number);
                 } else switch (ch) {
-                case ' ': case '\t': case '\r': case eolnCh:
+                case ' ': case '\t': case '\r': case '\n':
                     ch = nextChar();
                     break;
             
@@ -77,7 +77,7 @@ namespace LexerParser
                     // comment
                     do {
                         ch = nextChar();
-                    } while (ch != eolnCh);
+                    } while (ch != '\n');
                     ch = nextChar();
                     break;
             
@@ -87,7 +87,7 @@ namespace LexerParser
                     ch = nextChar();
                     return Token.mkCharLiteral("" + ch1);
                 
-                case eofCh: return Token.eofTok;
+                case '\0': return Token.eofTok;
             
                 case '+': ch = nextChar();
                     return Token.plusTok;
@@ -128,8 +128,9 @@ namespace LexerParser
                 case '!':
                     return chkOpt('=', Token.notTok,
                                        Token.noteqTok);
-
-                default:  error("Illegal character " + ch); 
+                default:
+                    error("Illegal character " + ch);
+                    break;
                 } // switch
             } while (true);
         } // next
@@ -164,24 +165,24 @@ namespace LexerParser
             do {
                 r += ch;
                 ch = nextChar();
-            } while (set.indexOf(ch) >= 0);
+            } while (set.IndexOf(ch) >= 0);
             return r;
         }
 
         public void error (String msg) {
-            System.err.print(line);
-            System.err.println("Error: column " + col + " " + msg);
-            System.exit(1);
+            Console.Error.Write(line);
+            Console.Error.WriteLine("Error: column " + col + " " + msg);
+            Environment.Exit(1);
         }
-
+        /*
         static public void main ( String[] argv ) {
             Lexer lexer = new Lexer(argv[0]);
             Token tok = lexer.next( );
             while (tok != Token.eofTok) {
-                Console.WriteLine(tok.toString());
+                Console.WriteLine(tok.ToString());
                 tok = lexer.next( );
-            } 
-        } // main
+            }
+        } // main */
 
     }
 }

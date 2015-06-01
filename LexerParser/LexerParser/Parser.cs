@@ -30,22 +30,22 @@ namespace LexerParser
         }
   
         private void error(TokenType tok) {
-            System.err.println("Syntax error: expecting: " + tok 
+            Console.Error.WriteLine("Syntax error: expecting: " + tok 
                                + "; saw: " + token);
-            System.exit(1);
+            Environment.Exit(1);
         }
   
         private void error(String tok) {
-            System.err.println("Syntax error: expecting: " + tok 
+            Console.Error.WriteLine("Syntax error: expecting: " + tok 
                                + "; saw: " + token);
-            System.exit(1);
+            Environment.Exit(1);
         }
   
-        public Program program() {
+        public Program program_start() {
             // Program --> void main ( ) '{' Declarations Statements '}'
             TokenType[ ] header = {TokenType.Int, TokenType.Main,
                               TokenType.LeftParen, TokenType.RightParen};
-            for (int i=0; i<header.length; i++)   // bypass "int main ( )"
+            for (int i=0; i<header.Length; i++)   // bypass "int main ( )"
                 match(header[i]);
             match(TokenType.LeftBrace);
             // student exercise
@@ -59,7 +59,7 @@ namespace LexerParser
             // Declarations --> { Declaration }
             // student exercise
     	    Declarations ds = new Declarations();
-    	    while (isget_type())
+    	    while (isType())
     	    {
     		    declaration(ds);
     	    }
@@ -69,11 +69,11 @@ namespace LexerParser
         private void declaration (Declarations ds) {
             // Declaration  --> Type Identifier { , Identifier } ;
             // student exercise
-    	    Type t = get_type();
+    	    Type t = type();
     	    while (!(token.get_type() == TokenType.Semicolon))
     	    {
     		    Variable id = new Variable(match(TokenType.Identifier));
-    		    ds.add(new Declaration(id, t));
+    		    ds.Add(new Declaration(id, t));
     		    if(token.get_type() == TokenType.Comma)
     			    match(TokenType.Comma);
     	    }
@@ -124,9 +124,9 @@ namespace LexerParser
             // Block --> '{' Statements '}'
             Block b = new Block();
             // student exercise
-            while (!token.get_type() == TokenType.RightBrace)
+            while (!(token.get_type() == TokenType.RightBrace))
             {
-        	    b.members.add(statement());
+        	    b.members.Add(statement());
             }
             return b;
         }
@@ -284,10 +284,10 @@ namespace LexerParser
             {
             case TokenType.IntLiteral:
                 s = match(TokenType.IntLiteral);
-                return new IntValue(Integer.parseInt(s));
+                return new IntValue(int.Parse(s));
             case TokenType.CharLiteral:
                 s = match(TokenType.CharLiteral);
-                return new CharValue(s.charAt(0));
+                return new CharValue(s[0]);
             case TokenType.True:
                 s = match(TokenType.True);
                 return new BoolValue(true);
@@ -296,9 +296,9 @@ namespace LexerParser
                 return new BoolValue(false);
             case TokenType.FloatLiteral:
                 s = match(TokenType.FloatLiteral);
-                return new FloatValue(Float.parseFloat(s));
+                return new FloatValue(float.Parse(s));
             }
-            throw new IllegalArgumentException( "should not reach here");
+            throw new ArgumentException( "should not reach here");
         }
   
 
@@ -348,12 +348,12 @@ namespace LexerParser
             return token.get_type() == TokenType.True ||
                 token.get_type() == TokenType.False;
         }
-    
+        /*    
         public static void main(String[] args) {
             Parser parser  = new Parser(new Lexer(args[0]));
             Program prog = parser.program();
             prog.display();           // display abstract syntax tree
-        } //main
+        } //main*/
 
     } // Parser
 }
