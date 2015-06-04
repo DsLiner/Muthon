@@ -15,22 +15,25 @@ namespace LexerParser
 
         public static Token eofTok = new Token(TokenType.Eof, "<<EOF>>");
         public static Token boolTok = new Token(TokenType.Bool, "bool");
-        public static Token charTok = new Token(TokenType.Char, "char");
+        public static Token strTok = new Token(TokenType.String, "str");
         public static Token elseTok = new Token(TokenType.Else, "else");
         public static Token falseTok = new Token(TokenType.False, "false");
         public static Token floatTok = new Token(TokenType.Float, "float");
         public static Token ifTok = new Token(TokenType.If, "if");
+        public static Token elifTok = new Token(TokenType.Elif, "elif");
         public static Token intTok = new Token(TokenType.Int, "int");
         public static Token mainTok = new Token(TokenType.Main, "main");
+        public static Token timeTok = new Token(TokenType.Time, "Time");
+        public static Token NoteTok = new Token(TokenType.Note, "Note");
         public static Token trueTok = new Token(TokenType.True, "true");
         public static Token whileTok = new Token(TokenType.While, "while");
-        public static Token leftBraceTok = new Token(TokenType.LeftBrace, "{");
-        public static Token rightBraceTok = new Token(TokenType.RightBrace, "}");
         public static Token leftBracketTok = new Token(TokenType.LeftBracket, "[");
         public static Token rightBracketTok = new Token(TokenType.RightBracket, "]");
+        public static Token tabTok = new Token(TokenType.Tab, "\t");
+        public static Token colonTok = new Token(TokenType.Colon, ":");
         public static Token leftParenTok = new Token(TokenType.LeftParen, "(");
         public static Token rightParenTok = new Token(TokenType.RightParen, ")");
-        public static Token semicolonTok = new Token(TokenType.Semicolon, ";");
+        public static Token enterTok = new Token(TokenType.Enter, "\n");
         public static Token commaTok = new Token(TokenType.Comma, ",");
         public static Token assignTok = new Token(TokenType.Assign, "=");
         public static Token eqeqTok = new Token(TokenType.Equals, "==");
@@ -43,10 +46,12 @@ namespace LexerParser
         public static Token plusTok = new Token(TokenType.Plus, "+");
         public static Token minusTok = new Token(TokenType.Minus, "-");
         public static Token multiplyTok = new Token(TokenType.Multiply, "*");
+        public static Token powerTok = new Token(TokenType.Power, "**");
         public static Token divideTok = new Token(TokenType.Divide, "/");
         public static Token modulusTok = new Token(TokenType.Modulus, "%");
         public static Token andTok = new Token(TokenType.And, "&&");
         public static Token orTok = new Token(TokenType.Or, "||");
+        public static Token defTok = new Token(TokenType.Definition, "def");
 
         private TokenType type;
         private String value = "";
@@ -85,8 +90,8 @@ namespace LexerParser
             return new Token(TokenType.FloatLiteral, name);
         }
 
-        public static Token mkCharLiteral (String name) {
-            return new Token(TokenType.CharLiteral, name);
+        public static Token mkStrLiteral (String name) {
+            return new Token(TokenType.StringLiteral, name);
         }
 
         public override String ToString() {
@@ -101,13 +106,13 @@ namespace LexerParser
     }
 
     public enum TokenType {
-        Bool, Char, Else, False, Float,
-        If, Int, Main, True, While,
-        Eof, LeftBrace, RightBrace, LeftBracket, RightBracket,
-        LeftParen, RightParen, Semicolon, Comma, Assign,
+        Bool, String, Else, False, Float, Time, Note,
+        If, Elif, Int, Main, True, While, Definition,  
+        Eof, LeftBracket, RightBracket, Tab, Colon,
+        LeftParen, RightParen, Enter, Comma, Assign,
         Equals, Less, LessEqual, Greater, GreaterEqual,
-        Not, NotEqual, Plus, Minus, Multiply,
-        Divide, Modulus, And, Or, Identifier, IntLiteral,
-        FloatLiteral, CharLiteral
+        Not, NotEqual, Plus, Minus, Multiply, Power,
+        Divide, Modulus, And, Or,
+        Identifier, IntLiteral, FloatLiteral, StringLiteral
     }
 }

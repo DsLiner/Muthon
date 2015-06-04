@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+using System.Collections;
 
 namespace LexerParser
 {
@@ -14,10 +16,18 @@ namespace LexerParser
   
         Token token;          // current token from the input stream
         Lexer lexer;
+        public static StreamWriter ParseTreeOutput;
+        public static StreamWriter UcodeOutput;
+        int tabLevel;
   
-        public Parser(Lexer ts) { // Open the C++Lite source program
+        public Parser(Lexer ts, String filename) { // Open the C++Lite source program
             lexer = ts;                          // as a token stream, and
             token = lexer.next();            // retrieve its first Token
+            filename = filename.Replace(".txt", ".ptr");
+            ParseTreeOutput = new StreamWriter(filename);
+            filename = filename.Replace(".ptr", ".uco");
+            UcodeOutput = new StreamWriter(filename);
+            tabLevel = 0;
         }
   
         private String match (TokenType t) { // * return the string of a token if it matches with t *
@@ -42,42 +52,62 @@ namespace LexerParser
         }
   
         public Program program_start() {
-            // Program --> void main ( ) '{' Declarations Statements '}'
-            TokenType[ ] header = {TokenType.Int, TokenType.Main,
-                              TokenType.LeftParen, TokenType.RightParen};
-            for (int i=0; i<header.Length; i++)   // bypass "int main ( )"
-                match(header[i]);
-            match(TokenType.LeftBrace);
-            // student exercise
-            Declarations decpart = declarations();
-            Block body = statements();
-            match(TokenType.RightBrace);
-            return new Program(decpart, body);  // student exercise
+            Functions funcpart;
+            if (token.get_type() == TokenType.Definition)
+                funcpart = functions();
+            else
+                funcpart = null;
+            Body body = statements();
+            return new Program(funcpart, body);  // student exercise
         }
   
-        private Declarations declarations () {
+        private Functions functions () {
             // Declarations --> { Declaration }
             // student exercise
-    	    Declarations ds = new Declarations();
-    	    while (isType())
+    	    Functions funcs = new Functions();
+    	    while (token.get_type() == TokenType.Definition && tabLevel == 0)
     	    {
-    		    declaration(ds);
+    		    Function(funcs);
     	    }
-    	    return ds;
+    	    return funcs;
         }
   
-        private void declaration (Declarations ds) {
+        private void Function (Functions funcs) {
             // Declaration  --> Type Identifier { , Identifier } ;
             // student exercise
-    	    Type t = type();
-    	    while (!(token.get_type() == TokenType.Semicolon))
+            Function func = new Function();
+            while (token.get_type() != TokenType.Definition)
+                lexer.next();
+            match(TokenType.Definition);
+            func.id = new Variable(match(TokenType.Identifier));
+
+            match(TokenType.LeftParen);
+            if (token.get_type() == TokenType.Identifier)
+            {
+                match(TokenType.Identifier);
+                while(token.get_type() == TokenType.Comma)
+                {
+                    match(TokenType.Comma);
+                    func.parameters.Add(new Variable(match(TokenType.Identifier)));
+                }
+            }
+            match(TokenType.RightParen);
+            match(TokenType.Colon);
+            tabLevel = 1;
+    	    while (true)
     	    {
-    		    Variable id = new Variable(match(TokenType.Identifier));
-    		    ds.Add(new Declaration(id, t));
-    		    if(token.get_type() == TokenType.Comma)
-    			    match(TokenType.Comma);
+                if (token.get_type() == TokenType.Enter)
+                {
+                    match(TokenType.Enter);
+                    if (token.get_type() == TokenType.Enter)
+                    {
+                        match(TokenType.Enter);
+                        tabLevel = 0;
+                        break;
+                    }
+                }
+                func.members.Add(statement());
     	    }
-    	    match(TokenType.Semicolon);
         }
   
         private Type type () {
@@ -90,7 +120,7 @@ namespace LexerParser
         	    t = Type.BOOL;
             else if (token.get_type() == TokenType.Float)
         	    t = Type.FLOAT;
-            else if (token.get_type() == TokenType.Char)
+            else if (token.get_type() == TokenType.String)
         	    t = Type.CHAR;
             else error("int | bool | float | char");
             token = lexer.next();
@@ -101,44 +131,58 @@ namespace LexerParser
             // Statement --> ; | Block | Assignment | IfStatement | WhileStatement
             Statement s = new Skip();
             // student exercise
-            if (token.get_type() == TokenType.Semicolon)
-        	    token = lexer.next();
-            else if (token.get_type() == TokenType.LeftBrace)
+            for (int i = 0; i < tabLevel; i++)
             {
-        	    token = lexer.next();
-        	    s = statements();
-        	    match(TokenType.RightBrace);
+                if (token.get_type() != TokenType.Tab)
+                    break;
+                match(TokenType.Tab);
             }
+            if (token.get_type() == TokenType.Enter)
+        	    token = lexer.next();
             else if (token.get_type() == TokenType.If)
         	    s = ifStatement();
             else if (token.get_type() == TokenType.While)
         	    s = whileStatement();
             else if (token.get_type() == TokenType.Identifier)
-        	    s = assignment();
+            {
+                String target = match(TokenType.Identifier);
+                if (token.get_type() == TokenType.Assign)
+                    s = assignment(new Variable(target));
+                else
+                    s = functionCall(new FunctionName(target));
+            }
             else
         	    error("Illegal statement");
             return s;
         }
   
-        private Block statements () {
+        private Body statements () {
             // Block --> '{' Statements '}'
-            Block b = new Block();
+            Body b = new Body();
             // student exercise
-            while (!(token.get_type() == TokenType.RightBrace))
+            while (!(token.get_type() == TokenType.Eof))
             {
         	    b.members.Add(statement());
             }
             return b;
         }
   
-        private Assignment assignment () {
+        private Assignment assignment (Variable target) {
             // Assignment --> Identifier = Expression ;
             // student exercise
-    	    Variable target = new Variable(match(TokenType.Identifier));
     	    match(TokenType.Assign);
     	    Expression source = expression();
-    	    match(TokenType.Semicolon);
     	    return new Assignment(target, source);
+        }
+
+        private FunctionCall functionCall(FunctionName target)
+        {
+            ArrayList parameter = new ArrayList();
+            match(TokenType.LeftParen);
+            while(token.get_type() != TokenType.RightParen)
+                parameter.Add(expression());
+            match(TokenType.RightParen);
+            return new FunctionCall(target, parameter);
         }
   
         private Conditional ifStatement () {
@@ -285,8 +329,8 @@ namespace LexerParser
             case TokenType.IntLiteral:
                 s = match(TokenType.IntLiteral);
                 return new IntValue(int.Parse(s));
-            case TokenType.CharLiteral:
-                s = match(TokenType.CharLiteral);
+            case TokenType.StringLiteral:
+                s = match(TokenType.StringLiteral);
                 return new CharValue(s[0]);
             case TokenType.True:
                 s = match(TokenType.True);
@@ -334,14 +378,14 @@ namespace LexerParser
             return token.get_type() == TokenType.Int
                 || token.get_type() == TokenType.Bool
                 || token.get_type() == TokenType.Float
-                || token.get_type() == TokenType.Char;
+                || token.get_type() == TokenType.String;
         }
     
         private bool isLiteral( ) {
             return token.get_type() == TokenType.IntLiteral ||
                 isboolLiteral() ||
                 token.get_type() == TokenType.FloatLiteral ||
-                token.get_type() == TokenType.CharLiteral;
+                token.get_type() == TokenType.StringLiteral;
         }
     
         private bool isboolLiteral( ) {

@@ -67,7 +67,7 @@ namespace LexerParser
                     number += concat(digits);
                     return Token.mkFloatLiteral(number);
                 } else switch (ch) {
-                case ' ': case '\t': case '\r': case '\n':
+                case ' ': case '\r': 
                     ch = nextChar();
                     break;
             
@@ -82,10 +82,15 @@ namespace LexerParser
                     break;
             
                 case '\'':  // char literal
-                    char ch1 = nextChar();
-                    nextChar(); // get '
+                    String str = "\'";
                     ch = nextChar();
-                    return Token.mkCharLiteral("" + ch1);
+                    while(ch != '\'')
+                    {
+                        str = str + ch;
+                        ch = nextChar();
+                    }
+                    ch = nextChar();
+                    return Token.mkStrLiteral(str + "\'");
                 
                 case '\0': return Token.eofTok;
             
@@ -96,6 +101,11 @@ namespace LexerParser
                 case '-' : ch = nextChar();
             	    return Token.minusTok;
                 case '*' : ch = nextChar();
+                    if (ch == '*')
+                    {
+                        ch = nextChar();
+                        return Token.powerTok;
+                    }   
             	    return Token.multiplyTok;
                 case '%': ch = nextChar();
                     return Token.modulusTok;
@@ -103,12 +113,12 @@ namespace LexerParser
         		    return Token.leftParenTok;
                 case ')' : ch = nextChar();
         		    return Token.rightParenTok;
-                case '{' : ch = nextChar();
-        		    return Token.leftBraceTok;
-                case '}' : ch = nextChar();
-        		    return Token.rightBraceTok;
-                case ';' : ch = nextChar();
-        		    return Token.semicolonTok;
+                case '\t' : ch = nextChar();
+        		    return Token.tabTok;
+                case '\n' : ch = nextChar();
+        		    return Token.enterTok;
+                case ':' : ch = nextChar();
+        		    return Token.colonTok;
                 case ',' : ch = nextChar();
         		    return Token.commaTok;
                 
